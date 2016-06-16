@@ -1,4 +1,4 @@
-This is a parser for CSV statements produced by UniCredit Bank Czech and Slovak Republic a.s.
+This is a parser for CSV statements produced by UniCredit Bank Czech Republic and Slovakia a.s.
 from within the report in Account History (export in UNICREDIT format).
 
 It is a plugin for `ofxstatement`_.
