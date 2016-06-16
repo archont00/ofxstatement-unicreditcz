@@ -9,12 +9,12 @@ version = "0.0.1"
 with open('README.rst') as f:
     long_description = f.read()
 
-setup(name='ofxstatement-sample',
+setup(name='ofxstatement-unicreditcz',
       version=version,
-      author="Andrey Lebedev",
-      author_email="andrey@lebedev.lt",
-      url="https://github.com/kedder/ofxstatement",
-      description=("Sample plugin for ofxstatement"),
+      author="Milan Knížek",
+      author_email="knizek@volny.cz",
+      url="https://github.com/milankni/ofxstatement-unicreditcz",
+      description=("Ofxstatement plugin for UniCredit Bank Czech & Slovak Republic - account history in UNICREDIT format"),
       long_description=long_description,
       license="GPLv3",
       keywords=["ofx", "banking", "statement"],
@@ -32,7 +32,7 @@ setup(name='ofxstatement-sample',
       namespace_packages=["ofxstatement", "ofxstatement.plugins"],
       entry_points={
           'ofxstatement':
-          ['sample = ofxstatement.plugins.sample:SamplePlugin']
+          ['unicreditcz = ofxstatement.plugins.unicreditcz:UniCreditCZPlugin']
           },
       install_requires=['ofxstatement'],
       include_package_data=True,
