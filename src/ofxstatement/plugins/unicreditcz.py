@@ -86,8 +86,11 @@ class UniCreditCZParser(CsvStatementParser):
         if line[7].startswith("VRÁCENÍ POPLATKU ZA "):
             sl.trntype = "FEE"
 
+        # sl.payee is imported as "Description" in GnuCash
+        # sl.memo is imported as "Notes" in GnuCash
+        # When sl.payee is empty, GnuCash imports sl.memo to "Description" and keeps "Notes" empty
         sl.memo = sl.memo + line[14]   + line[15] + line[16] + line[17] + line[18]
-        sl.memo = sl.memo + "|NázÚČ: " + sl.payee + "|ÚČ: "  + line[8]  + "/"     + line[5]
+        sl.memo = sl.memo + "|NázÚČ: " + "|ÚČ: "  + line[8]  + "/"      + line[5]
         sl.memo = sl.memo + "|VS: "    + line[20] + "|KS: "  + line[19] + "|SS: " + line[21]
 
         if sl.amount == 0:
