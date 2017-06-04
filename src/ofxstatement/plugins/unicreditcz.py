@@ -9,9 +9,8 @@ from ofxstatement.statement import Statement
 
 
 class UniCreditCZPlugin(Plugin):
-    """UniCreditCZ plugin
+    """UniCredit Bank Czech Republic and Slovakia a.s. (UNICREDIT format)
     """
-
 
     def get_parser(self, filename):
         UniCreditCZPlugin.encoding = self.settings.get('charset', 'utf-8')
@@ -77,6 +76,9 @@ class UniCreditCZParser(CsvStatementParser):
 
         sl.id = statement.generate_transaction_id(sl)
 
+        if sl.amount == 0:
+            return None
+
         if line[13].startswith("SRÁŽKOVÁ DAŇ"):
             sl.trntype = "DEBIT"
         if line[7].startswith("ÚROKY"):
@@ -90,15 +92,23 @@ class UniCreditCZParser(CsvStatementParser):
         # sl.memo is imported as "Notes" in GnuCash
         # When sl.payee is empty, GnuCash imports sl.memo to "Description" and keeps "Notes" empty
         sl.memo = sl.memo + line[14] + line[15] + line[16] + line[17] + line[18]
-        sl.memo = sl.memo + "|ÚČ: "  + line[8]  + "/"      + line[5]
-        sl.memo = sl.memo + "|VS: "  + line[20] + "|KS: "  + line[19] + "|SS: " + line[21]
 
-        if sl.amount == 0:
-            return None
+        if not (line[8]  == "" or line[8]  == " "):
+            sl.memo = sl.memo + "|ÚČ: "  + line[8]  + "/" + line[5]
+
+        if not (line[20] == "" or line[20] == " "):
+            sl.memo = sl.memo + "|VS: "  + line[20]
+
+        if not (line[19] == "" or line[19] == " "):
+            sl.memo = sl.memo + "|KS: "  + line[19]
+
+        if not (line[21] == "" or line[21] == " "):
+            sl.memo = sl.memo + "|SS: " + line[21]
 
         return sl
 
-
+    # Substitute decimal point "," with "."
+    # Remove thousands separator and and other text in value field
     def parse_float(self, value):
         value = re.sub(",", ".", value)
         value = re.sub("[ a-zA-Z]", "", value)
