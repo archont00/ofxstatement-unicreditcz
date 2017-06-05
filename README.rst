@@ -1,26 +1,30 @@
-This is a parser for CSV statements produced by UniCredit Bank Czech Republic and Slovakia a.s.
-from within the report in Account History (export in UNICREDIT format).
-
-It is a plugin for `ofxstatement`_.
+This is a parser for CSV statements produced by UniCredit Bank Czech Republic and Slovakia a.s. from account transaction history. It is a plugin for `ofxstatement`_.
 
 .. _ofxstatement: https://github.com/kedder/ofxstatement
 
-Usage:
+It supports two formats of CSV files:
+::
 
-    ofxstatement convert -t unicreditcz bank-statement.csv bank-statement.ofx
+-t unicreditcz16      CSV (called as "UNICREDIT") used till 2016
+-t unicreditcz        CSV used since 2017
 
-    ofxstatement convert -t unicreditcz:EUR bank-statement.csv bank-statement.ofx
+Usage
+=====
+::
 
-Configuration:
+$   ofxstatement convert -t unicreditcz export.csv export.ofx
+$   ofxstatement convert -t unicreditcz:EUR export.csv export.ofx
 
-    ofxstatement edit-config
+Configuration
+=============
 
-and set e.g. the following
+To edit the configuration file run::
 
-    [unicreditcz:EUR]
+$ ofxstatement edit-config
 
-    plugin = unicreditcz
+and set any options you wish::
 
-    currency = EUR
-
-    account = Uni EUR
+ [unicreditcz:EUR]
+ plugin = unicreditcz
+ currency = EUR
+ account = Uni EUR
