@@ -1,15 +1,14 @@
 import csv
 from datetime import datetime
-import re
 
 from ofxstatement import statement
 from ofxstatement.parser import CsvStatementParser
 from ofxstatement.plugin import Plugin
-from ofxstatement.statement import Statement
+#from ofxstatement.statement import Statement
 
 
 class UniCreditCZPlugin(Plugin):
-    """UniCredit Bank Czech Republic and Slovakia a.s. (UNICREDIT format)
+    """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format since 2017)
     """
 
     def get_parser(self, filename):
@@ -51,16 +50,18 @@ class UniCreditCZParser(CsvStatementParser):
     # 21 Specifický kód
     # 22 Platební titul
     # 23 Reference
+    # 24 Status
 
-    mappings = {"date_user": 3,
+    mappings = {"amount": 1,
+                "date_user": 3,
                 "date": 4,
-                "memo": 13,
                 "payee": 9,
-                "amount": 1,
+                "memo": 13,
                 "check_no": 20,
                 "refnum": 23, }
 
-    date_format = "%Y-%m-%d"
+    date_user_format = "%Y-%m-%d"
+    date_format = "%Y-%m-%d %H:%M:%S"
 
 
     def split_records(self):
@@ -68,48 +69,63 @@ class UniCreditCZParser(CsvStatementParser):
 
 
     def parse_record(self, line):
+        # Ignore headers
         if self.cur_record <= 3:
             return None
 
-        sl = super(UniCreditCZParser, self).parse_record(line)
-        sl.date_user = datetime.strptime(sl.date_user, self.date_format)
+        # Ignore incomplete lines
+        if len(line) < 24:
+            return None
 
-        sl.id = statement.generate_transaction_id(sl)
+        StatementLine = super(UniCreditCZParser, self).parse_record(line)
 
-        if sl.amount == 0:
+        StatementLine.date_user = datetime.strptime(StatementLine.date_user, self.date_user_format)
+
+        StatementLine.id = statement.generate_transaction_id(StatementLine)
+
+        if StatementLine.amount == 0:
             return None
 
         if line[13].startswith("SRÁŽKOVÁ DAŇ"):
-            sl.trntype = "DEBIT"
+            StatementLine.trntype = "DEBIT"
         if line[7].startswith("ÚROKY"):
-            sl.trntype = "INT"
+            StatementLine.trntype = "INT"
         if line[7].startswith("Poplatek za "):
-            sl.trntype = "FEE"
+            StatementLine.trntype = "FEE"
         if line[7].startswith("VRÁCENÍ POPLATKU ZA "):
-            sl.trntype = "FEE"
+            StatementLine.trntype = "FEE"
 
-        # sl.payee is imported as "Description" in GnuCash
-        # sl.memo is imported as "Notes" in GnuCash
-        # When sl.payee is empty, GnuCash imports sl.memo to "Description" and keeps "Notes" empty
-        sl.memo = sl.memo + line[14] + line[15] + line[16] + line[17] + line[18]
+        # .payee is imported as "Description" in GnuCash
+        # .memo is imported as "Notes" in GnuCash
+        # When .payee is empty, GnuCash imports .memo to "Description" and keeps "Notes" empty
+        StatementLine.memo = StatementLine.memo + " " + line[14]
+        StatementLine.memo = StatementLine.memo + " " + line[15]
+        StatementLine.memo = StatementLine.memo + " " + line[16]
+        StatementLine.memo = StatementLine.memo + " " + line[17]
+        StatementLine.memo = StatementLine.memo + " " + line[18]
+        StatementLine.memo = " ".join(StatementLine.memo.split())
+        StatementLine.memo = StatementLine.memo.strip()
+
+        StatementLine.payee = " ".join(StatementLine.payee.split())
+        StatementLine.payee = StatementLine.payee.strip()
 
         if not (line[8]  == "" or line[8]  == " "):
-            sl.memo = sl.memo + "|ÚČ: "  + line[8]  + "/" + line[5]
+            StatementLine.memo = StatementLine.memo + "|ÚČ: "  + line[8]  + "/" + line[5]
 
         if not (line[20] == "" or line[20] == " "):
-            sl.memo = sl.memo + "|VS: "  + line[20]
+            StatementLine.memo = StatementLine.memo + "|VS: "  + line[20]
 
         if not (line[19] == "" or line[19] == " "):
-            sl.memo = sl.memo + "|KS: "  + line[19]
+            StatementLine.memo = StatementLine.memo + "|KS: "  + line[19]
 
         if not (line[21] == "" or line[21] == " "):
-            sl.memo = sl.memo + "|SS: " + line[21]
+            StatementLine.memo = StatementLine.memo + "|SS: " + line[21]
 
-        return sl
+        return StatementLine
 
     # Substitute decimal point "," with "."
-    # Remove thousands separator and and other text in value field
+    # Remove thousands separator
     def parse_float(self, value):
-        value = re.sub(",", ".", value)
-        value = re.sub("[ a-zA-Z]", "", value)
+        value = value.replace(".", "")
+        value = value.replace(",", ".")
         return super(UniCreditCZParser, self).parse_float(value)
