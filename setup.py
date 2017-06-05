@@ -4,7 +4,7 @@
 from setuptools import find_packages
 from distutils.core import setup
 
-version = "0.0.1"
+version = "0.0.3"
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -14,7 +14,7 @@ setup(name='ofxstatement-unicreditcz',
       author="Milan Knížek",
       author_email="knizek@volny.cz",
       url="https://github.com/milankni/ofxstatement-unicreditcz",
-      description=("Ofxstatement plugin for UniCredit Bank Czech & Slovak Republic - account history in UNICREDIT format"),
+      description=("Ofxstatement plugin for UniCredit Bank Czech & Slovak Republic (export of account history in CSV)"),
       long_description=long_description,
       license="GPLv3",
       keywords=["ofx", "banking", "statement"],
@@ -32,7 +32,8 @@ setup(name='ofxstatement-unicreditcz',
       namespace_packages=["ofxstatement", "ofxstatement.plugins"],
       entry_points={
           'ofxstatement':
-          ['unicreditcz = ofxstatement.plugins.unicreditcz:UniCreditCZPlugin']
+          ['unicreditcz16 = ofxstatement.plugins.unicreditcz16:UniCreditCZ16Plugin',
+           'unicreditcz = ofxstatement.plugins.unicreditcz:UniCreditCZPlugin',]
           },
       install_requires=['ofxstatement'],
       include_package_data=True,
