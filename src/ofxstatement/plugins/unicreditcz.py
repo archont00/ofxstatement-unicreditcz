@@ -8,7 +8,7 @@ from ofxstatement.plugin import Plugin
 
 
 class UniCreditCZPlugin(Plugin):
-    """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format since 2017)
+    """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format since 08-Oct-2017, new banking)
     """
 
     def get_parser(self, filename):
@@ -61,7 +61,7 @@ class UniCreditCZParser(CsvStatementParser):
                 "refnum": 23, }
 
     date_user_format = "%Y-%m-%d"
-    date_format = "%Y-%m-%d %H:%M:%S"
+    date_format = "%Y-%m-%d"
 
 
     def split_records(self):
