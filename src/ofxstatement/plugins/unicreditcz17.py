@@ -7,14 +7,14 @@ from ofxstatement.plugin import Plugin
 #from ofxstatement.statement import Statement
 
 
-class UniCreditCZPlugin(Plugin):
+class UniCreditCZ17Plugin(Plugin):
     """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format used till 07-Oct-2017, new banking)
     """
 
     def get_parser(self, filename):
-        UniCreditCZPlugin.encoding = self.settings.get('charset', 'utf-8')
-        f = open(filename, "r", encoding=UniCreditCZPlugin.encoding)
-        parser = UniCreditCZParser(f)
+        UniCreditCZ17Plugin.encoding = self.settings.get('charset', 'utf-8')
+        f = open(filename, "r", encoding=UniCreditCZ17Plugin.encoding)
+        parser = UniCreditCZ17Parser(f)
         parser.statement.currency = self.settings.get('currency', 'CZK')
         parser.statement.bank_id = self.settings.get('bank', 'BACXCZPP')
         parser.statement.account_id = self.settings.get('account', '')
@@ -23,7 +23,7 @@ class UniCreditCZPlugin(Plugin):
         return parser
 
 
-class UniCreditCZParser(CsvStatementParser):
+class UniCreditCZ17Parser(CsvStatementParser):
 
     # The columns are:
     #  0 Účet
@@ -77,7 +77,7 @@ class UniCreditCZParser(CsvStatementParser):
         if len(line) < 24:
             return None
 
-        StatementLine = super(UniCreditCZParser, self).parse_record(line)
+        StatementLine = super(UniCreditCZ17Parser, self).parse_record(line)
 
         StatementLine.date_user = datetime.strptime(StatementLine.date_user, self.date_user_format)
 
@@ -128,4 +128,4 @@ class UniCreditCZParser(CsvStatementParser):
     def parse_float(self, value):
         value = value.replace(".", "")
         value = value.replace(",", ".")
-        return super(UniCreditCZParser, self).parse_float(value)
+        return super(UniCreditCZ17Parser, self).parse_float(value)
