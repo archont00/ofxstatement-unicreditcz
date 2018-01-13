@@ -33,6 +33,7 @@ setup(name='ofxstatement-unicreditcz',
       entry_points={
           'ofxstatement':
           ['unicreditcz16 = ofxstatement.plugins.unicreditcz16:UniCreditCZ16Plugin',
+           'unicreditcz17 = ofxstatement.plugins.unicreditcz17:UniCreditCZ17Plugin',
            'unicreditcz = ofxstatement.plugins.unicreditcz:UniCreditCZPlugin',]
           },
       install_requires=['ofxstatement'],
