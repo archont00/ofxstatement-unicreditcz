@@ -13,3 +13,4 @@ eggs
 .idea
 ./*.csv
 ./*.ofx
+./*.sh
