@@ -19,7 +19,7 @@ class UniCreditCZPlugin(Plugin):
         parser.statement.bank_id = self.settings.get('bank', 'BACXCZPP')
         parser.statement.account_id = self.settings.get('account', '')
         parser.statement.account_type = self.settings.get('account_type', 'CHECKING')
-        parser.statement.trntype = "OTHER"
+        parser.statement.trntype = "XFER"
         return parser
 
 
@@ -52,13 +52,15 @@ class UniCreditCZParser(CsvStatementParser):
     # 23 Reference
     # 24 Status
 
-    mappings = {"amount": 1,
-                "date_user": 3,
-                "date": 4,
-                "payee": 9,
-                "memo": 13,
-                "check_no": 20,
-                "refnum": 23, }
+    mappings = {
+        "amount": 1,
+        "date": 3,
+        "date_user": 4,
+        "payee": 9,
+        "memo": 13,
+        "check_no": 20,
+        "refnum": 23,
+    }
 
     date_user_format = "%Y-%m-%d"
     date_format = "%Y-%m-%d"
@@ -86,13 +88,13 @@ class UniCreditCZParser(CsvStatementParser):
         if StatementLine.amount == 0:
             return None
 
-        if line[13].startswith("SRÁŽKOVÁ DAŇ"):
+        if   line[13].startswith("SRÁŽKOVÁ DAŇ"):
             StatementLine.trntype = "DEBIT"
-        if line[7].startswith("ÚROKY"):
+        elif line[7].startswith("ÚROKY"):
             StatementLine.trntype = "INT"
-        if line[7].startswith("Poplatek za "):
+        elif line[7].startswith("Poplatek za "):
             StatementLine.trntype = "FEE"
-        if line[7].startswith("VRÁCENÍ POPLATKU ZA "):
+        elif line[7].startswith("VRÁCENÍ POPLATKU ZA "):
             StatementLine.trntype = "FEE"
 
         # .payee is imported as "Description" in GnuCash
