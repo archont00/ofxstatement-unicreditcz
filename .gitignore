@@ -11,6 +11,6 @@ eggs
 .pydevproject
 *.sublime*
 .idea
-./*.csv
-./*.ofx
-./*.sh
+*.csv
+*.ofx
+*.sh
