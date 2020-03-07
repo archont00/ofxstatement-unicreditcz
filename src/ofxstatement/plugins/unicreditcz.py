@@ -8,7 +8,7 @@ from ofxstatement.plugin import Plugin
 
 
 class UniCreditCZPlugin(Plugin):
-    """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format since 08-Oct-2017, new banking)
+    """UniCredit Bank Czech Republic and Slovakia a.s. (CSV format since cca 2018, new banking)
     """
 
     def get_parser(self, filename):
@@ -26,31 +26,38 @@ class UniCreditCZPlugin(Plugin):
 class UniCreditCZParser(CsvStatementParser):
 
     # The columns are:
-    #  0 Účet
+    #  0 Číslo účtu
     #  1 Částka
     #  2 Měna
-    #  3 Datum zaúčtování
-    #  4 Valuta
-    #  5 Banka
-    #  6 Název banky
-    #  7 Název banky
-    #  8 Číslo účtu
-    #  9 Název účtu
-    # 10 Adresa
-    # 11 Adresa
-    # 12 Adresa
-    # 13 Detaily transakce
-    # 14 Detaily transakce
-    # 15 Detaily transakce
-    # 16 Detaily transakce
-    # 17 Detaily transakce
-    # 18 Detaily transakce
-    # 19 Konstatní kód
-    # 20 Variabilní kód
-    # 21 Specifický kód
-    # 22 Platební titul
-    # 23 Reference
-    # 24 Status
+    #  3 Datum rezervace
+    #  4 Datum
+    #  5 Kód banky protistrany
+    #  6 Název banky protistrany 1
+    #  7 Banka příjemce 2
+    #  8 Číslo účtu protistrany
+    #  9 Příjemce
+    #  10 Adresa 1
+    #  11 Adresa 2
+    #  12 Adresa 3
+    #  13 Detaily transakce 1
+    #  14 Detaily transakce 2
+    #  15 Detaily transakce 3
+    #  16 Detaily transakce 4
+    #  17 Detaily transakce 5
+    #  18 Detaily transakce 6
+    #  19 KS
+    #  20 VS
+    #  21 SS
+    #  22 Směnný kurz
+    #  23 Referenční číslo
+    #  24 Status
+    #  25 Datum zamítnutí
+    #  26 Detail zamítnutí
+    #  27 Registrační číslo TPP
+    #  28 Název TPP
+    #  29 Reference příkazu TPP
+    #  30 Země registrace
+    #  31 Kód národní autority
 
     mappings = {
         "amount": 1,
@@ -72,7 +79,7 @@ class UniCreditCZParser(CsvStatementParser):
 
     def parse_record(self, line):
         # Ignore headers
-        if self.cur_record <= 3:
+        if self.cur_record <= 4:
             return None
 
         # Ignore incomplete lines
@@ -90,7 +97,7 @@ class UniCreditCZParser(CsvStatementParser):
 
         if   line[13].startswith("SRÁŽKOVÁ DAŇ"):
             StatementLine.trntype = "DEBIT"
-        elif line[7].startswith("ÚROKY"):
+        elif line[7].startswith("UROK DO"):
             StatementLine.trntype = "INT"
         elif line[7].startswith("Poplatek za "):
             StatementLine.trntype = "FEE"
