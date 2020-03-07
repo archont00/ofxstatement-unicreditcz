@@ -2,11 +2,12 @@ This is a parser for CSV statements produced by UniCredit Bank Czech Republic an
 
 .. _ofxstatement: https://github.com/kedder/ofxstatement
 
-It supports three formats of CSV files (blame the bank management)::
+It supports multiple formats of CSV files (blame the bank management)::
 
 -t unicreditcz16      CSV (called as "UNICREDIT") used till 07-Oct-17 (old banking)
 -t unicreditcz17      CSV (called as "UNICREDIT") used till 07-Oct-17 (new banking)
--t unicreditcz        CSV used since 08-Oct-2017 (new banking)
+-t unicreditcz18      CSV used since 08-Oct-2017 till cca half year 2019 (new banking)
+-t unicreditcz        CSV used since cca half year 2019 (new banking)
 
 Usage
 =====
