@@ -69,6 +69,7 @@ class UniCreditCZParser(CsvStatementParser):
         "refnum": 23,
     }
 
+    #date_user_format = "%Y-%m-%d %H:%M:%S"
     date_user_format = "%Y-%m-%d"
     date_format = "%Y-%m-%d"
 
@@ -88,7 +89,9 @@ class UniCreditCZParser(CsvStatementParser):
 
         StatementLine = super(UniCreditCZParser, self).parse_record(line)
 
-        StatementLine.date_user = datetime.strptime(StatementLine.date_user, self.date_user_format)
+        # Seems like python imports the date correctly, no need to convert anymore
+        #print(StatementLine.date_user)
+        #StatementLine.date_user = datetime.strptime(StatementLine.date_user, self.date_user_format)
 
         StatementLine.id = statement.generate_transaction_id(StatementLine)
 
