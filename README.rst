@@ -9,6 +9,11 @@ It supports multiple formats of CSV files (blame the bank management)::
 -t unicreditcz18      CSV used since 08-Oct-2017 till cca half year 2019 (new banking)
 -t unicreditcz        CSV used since cca half year 2019 (new banking)
 
+Installation
+============
+
+Get ofxstatement installed and working. Then, you can check the test.sh script for inspiration. System-wide installation is out of scope of this README.
+
 Usage
 =====
 ::
