@@ -130,41 +130,33 @@ class UniCreditCZParser(CsvStatementParser):
         StatementLine.memo = StatementLine.memo + " " + line[16]
         StatementLine.memo = StatementLine.memo + " " + line[17]
         StatementLine.memo = StatementLine.memo + " " + line[18]
+        StatementLine.memo = StatementLine.memo.split()
+        # Remove null items
+        StatementLine.memo = [x for x in StatementLine.memo if x]
+        StatementLine.memo = " ".join(StatementLine.memo)
 
-        StatementLine.memo = " ".join(StatementLine.memo.split())
-        StatementLine.memo = StatementLine.memo.strip()
+        StatementLine.memo = StatementLine.memo + "|VS:"  + line[20].strip()
+        StatementLine.memo = StatementLine.memo.strip("|VS:")
 
-        if not (line[20] == "" or line[20] == " "):
-            StatementLine.memo = StatementLine.memo + "|VS:"  + line[20]
+        StatementLine.memo = StatementLine.memo + "|KS:"  + line[19].strip()
+        StatementLine.memo = StatementLine.memo.strip("|KS:")
 
-        if not (line[19] == "" or line[19] == " "):
-            StatementLine.memo = StatementLine.memo + "|KS:"  + line[19]
-
-        if not (line[21] == "" or line[21] == " "):
-            StatementLine.memo = StatementLine.memo + "|SS:" + line[21]
+        StatementLine.memo = StatementLine.memo + "|SS:" + line[21].strip()
+        StatementLine.memo = StatementLine.memo.strip("|SS:")
 
         # Counterparty name and address
-        if not (line[9]  == "" or line[9]  == " "):
-            StatementLine.payee = line[9]
-
-        if not (line[10]  == "" or line[10]  == " "):
-            StatementLine.payee = StatementLine.payee + ", " + line[10]
-
-        if not (line[11]  == "" or line[11]  == " "):
-            StatementLine.payee = StatementLine.payee + ", " + line[11]
-
-        if not (line[12]  == "" or line[12]  == " "):
-            StatementLine.payee = StatementLine.payee + ", " + line[12]
+        StatementLine.payee = StatementLine.payee + ", " + line[10].strip()
+        StatementLine.payee = StatementLine.payee + ", " + line[11].strip()
+        StatementLine.payee = StatementLine.payee + ", " + line[12].strip()
+        StatementLine.payee = StatementLine.payee.split(", ")
+        StatementLine.payee = [x for x in StatementLine.payee if x]
+        StatementLine.payee = ", ".join(StatementLine.payee)
 
         # Bank account of counterparty
-        if not (line[8]  == "" or line[8]  == " "):
-            StatementLine.payee = StatementLine.payee + "|" + line[8]
-
-        if not (line[5]  == "" or line[5]  == " "):
-            StatementLine.payee = StatementLine.payee + "/" + line[5]
-
-        StatementLine.payee = " ".join(StatementLine.payee.split())
-        StatementLine.payee = StatementLine.payee.strip()
+        StatementLine.payee = StatementLine.payee + "|" + line[8]
+        StatementLine.payee = StatementLine.payee + "/" + line[5]
+        StatementLine.payee = StatementLine.payee.strip("|")
+        StatementLine.payee = StatementLine.payee.strip("/")
 
         return StatementLine
 
