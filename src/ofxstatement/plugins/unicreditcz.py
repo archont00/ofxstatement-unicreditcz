@@ -135,14 +135,16 @@ class UniCreditCZParser(CsvStatementParser):
         StatementLine.memo = [x for x in StatementLine.memo if x]
         StatementLine.memo = " ".join(StatementLine.memo)
 
-        StatementLine.memo = StatementLine.memo + "|VS:"  + line[20].strip()
-        StatementLine.memo = StatementLine.memo.strip("|VS:")
+        if not (line[20] == "" or line[20] == " "):
+            StatementLine.memo = StatementLine.memo + "|VS:"  + line[20]
 
-        StatementLine.memo = StatementLine.memo + "|KS:"  + line[19].strip()
-        StatementLine.memo = StatementLine.memo.strip("|KS:")
+        if not (line[19] == "" or line[19] == " "):
+            StatementLine.memo = StatementLine.memo + "|KS:"  + line[19]
 
-        StatementLine.memo = StatementLine.memo + "|SS:" + line[21].strip()
-        StatementLine.memo = StatementLine.memo.strip("|SS:")
+        if not (line[21] == "" or line[21] == " "):
+            StatementLine.memo = StatementLine.memo + "|SS:" + line[21]
+
+        StatementLine.memo = StatementLine.memo.strip("|")
 
         # Counterparty name and address
         StatementLine.payee = StatementLine.payee + ", " + line[10].strip()
