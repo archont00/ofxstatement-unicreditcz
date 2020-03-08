@@ -25,29 +25,52 @@ class UniCreditCZPlugin(Plugin):
 
 class UniCreditCZParser(CsvStatementParser):
 
+    # GnuCash recognises the following descriptive fields:
+    # - Header for Transaction Journal:
+    #   - Description
+    #   - Notes
+    # - Line item memo for each account in a single Transaction Journal:
+    #   - Memo
+    #
+    # .payee is assigned to "Description" in GnuCash
+    # .memo is assigned to "Memo" in GnuCash and also concatenated
+    #       to "Notes" after "OFX ext. info" and "Trans type"
+    #
+    # When .payee is empty, GnuCash assigns .memo to:
+    # - "Description" and does not concatenate to "Notes"
+    # - "Memo"
+    #
+    # Although ofxstatement can create bank_account_to, GnuCash ignores it.
+    #
+    # In GnuCash, .check_no (if empty, then .refnum) is assigned to "Num".
+    #
+    # The approach is:
+    # - merge counterparty name (.payee) + account number + bank code
+    # - merge pmt reference (.memo) + other payment specifics (VS, KS, SS)
+
     # The columns are:
     #  0 Číslo účtu
     #  1 Částka
     #  2 Měna
     #  3 Datum rezervace
     #  4 Datum
-    #  5 Kód banky protistrany
-    #  6 Název banky protistrany 1
-    #  7 Banka příjemce 2
-    #  8 Číslo účtu protistrany
-    #  9 Příjemce
-    #  10 Adresa 1
-    #  11 Adresa 2
-    #  12 Adresa 3
-    #  13 Detaily transakce 1
-    #  14 Detaily transakce 2
-    #  15 Detaily transakce 3
-    #  16 Detaily transakce 4
-    #  17 Detaily transakce 5
-    #  18 Detaily transakce 6
-    #  19 KS
-    #  20 VS
-    #  21 SS
+    #  5 Kód banky protistrany : .payee 6
+    #  6 Název banky protistrany 1 :
+    #  7 Banka příjemce 2 :
+    #  8 Číslo účtu protistrany : .payee 5
+    #  9 Příjemce : .payee 1
+    #  10 Adresa 1 : .payee 2
+    #  11 Adresa 2 : .payee 3
+    #  12 Adresa 3 : .payee 4
+    #  13 Detaily transakce 1 : .memo 1
+    #  14 Detaily transakce 2 : .memo 2
+    #  15 Detaily transakce 3 : .memo 3
+    #  16 Detaily transakce 4 : .memo 4
+    #  17 Detaily transakce 5 : .memo 5
+    #  18 Detaily transakce 6 : .memo 6
+    #  19 KS : .memo 8
+    #  20 VS : .memo 7 and .check_no
+    #  21 SS : .memo 9
     #  22 Směnný kurz
     #  23 Referenční číslo
     #  24 Status
@@ -69,8 +92,7 @@ class UniCreditCZParser(CsvStatementParser):
         "refnum": 23,
     }
 
-    #date_user_format = "%Y-%m-%d %H:%M:%S"
-    date_user_format = "%Y-%m-%d"
+    #date_format = "%Y-%m-%d %H:%M:%S"
     date_format = "%Y-%m-%d"
 
 
@@ -89,10 +111,6 @@ class UniCreditCZParser(CsvStatementParser):
 
         StatementLine = super(UniCreditCZParser, self).parse_record(line)
 
-        # Seems like python imports the date correctly, no need to convert anymore
-        #print(StatementLine.date_user)
-        #StatementLine.date_user = datetime.strptime(StatementLine.date_user, self.date_user_format)
-
         StatementLine.id = statement.generate_transaction_id(StatementLine)
 
         if StatementLine.amount == 0:
@@ -107,36 +125,51 @@ class UniCreditCZParser(CsvStatementParser):
         elif line[7].startswith("VRÁCENÍ POPLATKU ZA "):
             StatementLine.trntype = "FEE"
 
-        # .payee is imported as "Description" in GnuCash
-        # .memo is imported as "Notes" in GnuCash
-        # When .payee is empty, GnuCash imports .memo to "Description" and keeps "Notes" empty
         StatementLine.memo = StatementLine.memo + " " + line[14]
         StatementLine.memo = StatementLine.memo + " " + line[15]
         StatementLine.memo = StatementLine.memo + " " + line[16]
         StatementLine.memo = StatementLine.memo + " " + line[17]
         StatementLine.memo = StatementLine.memo + " " + line[18]
+
         StatementLine.memo = " ".join(StatementLine.memo.split())
         StatementLine.memo = StatementLine.memo.strip()
+
+        if not (line[20] == "" or line[20] == " "):
+            StatementLine.memo = StatementLine.memo + "|VS:"  + line[20]
+
+        if not (line[19] == "" or line[19] == " "):
+            StatementLine.memo = StatementLine.memo + "|KS:"  + line[19]
+
+        if not (line[21] == "" or line[21] == " "):
+            StatementLine.memo = StatementLine.memo + "|SS:" + line[21]
+
+        # Counterparty name and address
+        if not (line[9]  == "" or line[9]  == " "):
+            StatementLine.payee = line[9]
+
+        if not (line[10]  == "" or line[10]  == " "):
+            StatementLine.payee = StatementLine.payee + ", " + line[10]
+
+        if not (line[11]  == "" or line[11]  == " "):
+            StatementLine.payee = StatementLine.payee + ", " + line[11]
+
+        if not (line[12]  == "" or line[12]  == " "):
+            StatementLine.payee = StatementLine.payee + ", " + line[12]
+
+        # Bank account of counterparty
+        if not (line[8]  == "" or line[8]  == " "):
+            StatementLine.payee = StatementLine.payee + "|" + line[8]
+
+        if not (line[5]  == "" or line[5]  == " "):
+            StatementLine.payee = StatementLine.payee + "/" + line[5]
 
         StatementLine.payee = " ".join(StatementLine.payee.split())
         StatementLine.payee = StatementLine.payee.strip()
 
-        if not (line[8]  == "" or line[8]  == " "):
-            StatementLine.memo = StatementLine.memo + "|ÚČ: "  + line[8]  + "/" + line[5]
-
-        if not (line[20] == "" or line[20] == " "):
-            StatementLine.memo = StatementLine.memo + "|VS: "  + line[20]
-
-        if not (line[19] == "" or line[19] == " "):
-            StatementLine.memo = StatementLine.memo + "|KS: "  + line[19]
-
-        if not (line[21] == "" or line[21] == " "):
-            StatementLine.memo = StatementLine.memo + "|SS: " + line[21]
-
         return StatementLine
 
-    # Substitute decimal point "," with "."
     # Remove thousands separator
+    # Substitute decimal point "," with "."
     def parse_float(self, value):
         value = value.replace(".", "")
         value = value.replace(",", ".")
